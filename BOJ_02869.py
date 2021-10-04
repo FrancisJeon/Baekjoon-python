@@ -1,4 +1,4 @@
-""" 210616 19:50 항해 14번 QED """
+""" 210616 19:50 항해 14번 QED 달팽이는 올라가고 싶다"""
 import math
 
 a, b, v = map(int, input().split())

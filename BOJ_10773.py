@@ -1,4 +1,4 @@
-""" 210618 12:30 항해 23번 QED """
+""" 210618 12:30 항해 23번 QED 제로"""
 import sys
 k = int(sys.stdin.readline())
 money = []

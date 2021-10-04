@@ -1,4 +1,4 @@
-""" 210622 16:30 항해 30 QED """
+""" 210622 16:30 항해 30 QED 회전하는 큐"""
 # 풀이를 살펴보니 dequeue 라이브러리를 사용해서 쉽게 푸는것 같다.
 import sys
 inp = sys.stdin.readline

@@ -1,4 +1,4 @@
-""" 210621 01:00 항해 28번 QED """
+""" 210621 01:00 항해 28번 QED VPS 스택"""
 
 import sys
 hey = sys.stdin.readline
