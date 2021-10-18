@@ -1,36 +1,113 @@
-# 구글에서 답을 찾아서 복붙했다.
-n, m, v = map(int, input().split())
-matrix = [[0]*(n+1) for i in range(n+1)]
-# matrix 변수에 [0]이 노드갯수+1인 형태로 생성 ------- #
-# 0으로 초기화된 노드이고 n+1로 생성해서 인덱스를 편하게 하려는 듯하다.
-for i in range(m):
-    a, b = map(int, input().split())
-    matrix[a][b] = matrix[b][a] = 1
-visit_list = [0]*(n+1)
-# 노드 갯수만큼 반복하면서 matrix의 간선부분을 1로 바꿔주었다.
-# visit_list는 0을 n+1개만큼 반복해서 1차원 리스트로 생성해준다. 마찬가지로 인덱스를 바로 넣어주기 위해 +1을 넣어준듯 ------- #
-def dfs(v):
-    visit_list[v] = 1  # 방문한 점 1로 표시
-    print(v, end=' ')
-    for i in range(1, n+1):
-        if(visit_list[i] == 0 and matrix[v][i] == 1):
-            dfs(i)
-    # 1부터 n+1까지 i를 반복하면서 방문하지 않았고 matrix의 간선이 있을 경우 dfs를 재귀로 한번 더 들어가준다.
+# DFS와 BFS 211018 다시풀기
+""" 
+예전에 풀다가 답 복붙했고 1018 다시 시도하는중
 
-def bfs(v):
-    queue = [v]  # 들려야 할 정점 저장
-    visit_list[v] = 0  # 방문한 점 0으로 표시. 초기화 없이 앞에서 해준 값에서 이어주려고? -> 맞다.
+규칙 -> 방문 정점 여러개일 경우 번호가 작은걸 먼저 들린다.
+* visited를 따로 설정하지 않은 케이스
+1) BFS는 큐 DFS는 스택
+2) 주어진 정보를 dict[k] += [v]를 해줬는데 이제 양방향으로 dict[v] += [k] 도 해주는 방법으로 바꿨다.
+3) defaultdict를 사용해서 만드는게 가독성과 예외처리에 유리
+4) visited를 미리 만들어서 사용했는데 visited를 함수에 빈 리스트로 넣어서 not in 으로 체크하거나 set로 빼주는 방법도 좋음
+* visited를 만든 케이스
+1번 정답에 있는데 그래프를 생성할 때 딕셔너리가 아닌 0번에 []를 담은 2차원 배열로 생성해주었다.
+
+4 5 1
+1 4
+1 3
+1 2
+2 4
+3 4
+"""
+# 구글링 정답, 속도가 장점이고 visited 리스트를 활용하는 방식이 맘에들었다.
+import sys
+from collections import deque
+
+
+def dfs(graph, start, visited):
+    visited[start] = True
+    print(start, end=" ")
+    for i in graph[start]:
+        if not visited[i]:
+            dfs(graph, i, visited)
+
+
+def bfs(graph, start, visited):
+    queue = deque([start])
+    visited[start] = True
     while queue:
-        v = queue.pop(0)
-        print(v, end=' ')
-        for i in range(1, n+1):
-            if(visit_list[i] == 1 and matrix[v][i] == 1):
+        v = queue.popleft()
+        print(v, end=" ")
+        for i in graph[v]:
+            if not visited[i]:
                 queue.append(i)
-                visit_list[i] = 0
-    # queue가 비지 않았을 경우 0번인덱스를 pop 해주고 (popleft) 그 값을 v로 받는다.
-    # 그 다음 1~n+1사이의 i가 visit_list 방문한 리스트도 1이고 matrix도 1일 경우 visit_list 0으로 만들고 queue에 더해준다. 반복문 돌리기
-    # (DFS에서 1로 만들어줬기 때문에 0으로 만드는것 같다.) 
+                visited[i] = True
 
-dfs(v)
+
+n, m, v = map(int, sys.stdin.readline().split())
+# 노드 개수보다 하나 많은 텅빈 그래프 만들기 여기서 graph[0]은 쓰레기값
+graph = [[] for _ in range(n+1)]
+
+for _ in range(m):                      # 입력 받아서 그래프 만들기
+    a, b = map(int, sys.stdin.readline().split())
+    graph[a].append(b)
+    graph[b].append(a)
+for i in range(n+1):                      # 각 노드에서 연결된 '간선' 오름차순으로 정렬
+    graph[i].sort()
+
+
+visited = [False]*(n+1)                 # 각 노드의 방문여부를 표현
+dfs(graph, v, visited)
 print()
-bfs(v)
+visited = [False]*(n+1)                 # 각 노드의 방문여부를 표현
+bfs(graph, v, visited)
+
+
+
+# 2번, 정석 dfs, bfs로 visited = [0] * (n+1)을 사용하지 않은 방법
+# import sys
+# from collections import defaultdict
+# from collections import deque
+# input = sys.stdin.readline
+# adj_list = defaultdict(list)
+
+# n, m, s = map(int, input().split()) # 정점의 개수, 간선의 개수, 시작 정점 번호
+# for _ in range(m):
+#     k,v = map(int, input().split())
+#     adj_list[k] += [v]
+#     adj_list[v] += [k]
+# # print(adj_list) # 인접리스트로 연결된걸 확인 딕셔너리 내부에서 연결된걸 확인 -> sorting이 필요하다.
+# # for i in adj_list: adj_list[i]
+# # print(adj_list) # sorting 확인, DFS에서는 pop을 해주기 위해선 역순으로 해야한다. 하지만 BFS에서는 정렬 순서가 반대로 돼야 문제가 요구하는 방향으로 돌아간다. -> sorting을 두번의 케이스 별도로 해주기
+
+
+# def dfs(graph, start_node):
+#     visited = []
+#     stack = [start_node]
+    
+#     while stack:
+#         node = stack.pop()
+#         if node not in visited:
+#             visited.append(node)
+#             if node in graph:
+#                 temp = list(set(graph[node])-set(visited))
+#                 temp.sort(reverse=True) 
+#                 # 역순으로 sorting해서 넣으면 [4, 3, 2] 이렇게 담겨서 pop 할때 작은 값이 먼저 나온다.
+#                 stack += temp
+#     return visited
+
+# def bfs(graph, start_node):
+#     queue = deque([start_node])
+#     visited = []
+    
+#     while queue:
+#         node = queue.popleft()
+#         if node not in visited:
+#             visited.append(node)
+#             if node in graph:
+#                 temp = list(set(graph[node])-set(visited))
+#                 temp.sort()
+#                 queue += temp
+#     return visited
+
+# print(*dfs(adj_list, s))
+# print(*bfs(adj_list, s))
